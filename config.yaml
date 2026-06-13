@@ -1,0 +1,111 @@
+# Execution mode: backtest | paper | live
+mode: backtest
+
+# Data feed selection per mode (overrides can be set here)
+datafeed:
+  backtest: historical_csv
+  paper: fake_live
+  live: fake_live
+
+# Broker selection per mode
+broker:
+  backtest: simulated
+  paper: simulated
+  live: simulated  # Phase 5a brokers exist: robinhood | alpaca. Flipping this
+                   # to a live broker is the 5c go-live step — NOT before the
+                   # shadow week passes review and the pilot protocol engages.
+
+# Phase 5a — live broker rails (the pilot protocol is law; do not weaken)
+live_brokers:
+  # robinhood_account_number: set ROBINHOOD_ACCOUNT_NUMBER in .env (the AGENTIC account)
+  max_order_notional_usd: 50.0           # per-order ceiling
+  manual_approval: true                  # first-10-orders rule; approve via
+                                         # python -m stockbot.tools.approve_orders
+  kill_switch_path: KILL_SWITCH          # engage: New-Item KILL_SWITCH (or: touch KILL_SWITCH)
+
+# Phase 5b — shadow lane on the daily paper tick (live data, live decisions,
+# orders logged as shadow_order decision rows; broker never called)
+shadow:
+  enabled: true
+  bot_id: proportionality_shadow
+
+# Phase 2.5c — fade side on the daily paper tick: the gated lane grows fade
+# entries (one engine, two trade types) and the crash_fade_mech control twin
+# joins (fades EVERY detected >=10% crash at constant 0.55).
+fade:
+  enabled: true
+  mech_bot_id: crash_fade_mech
+  universe_metadata: stockbot/data/universe_expanded.metadata.json
+  # Shot 11 — the anti-sycophancy counter-pass v2 lane (crash_fade_v2). Additive;
+  # it shares the gated lane's per-crash rubric ensemble (only its ~2 counter-pass
+  # calls are marginal) and books the crash:fade_v2 bucket, prompt_version fade-v2.
+  # A clean three-way: v1 (brain) vs v2 (smarter brain) vs crash_fade_mech (coin).
+  v2_enabled: true
+  v2_bot_id: crash_fade_v2
+
+# Phase 3c/3d — Frontier propagation engine on the daily paper tick (default
+# OFF). When enabled, two ADDITIVE lanes join: `frontier` (graph-driven, on an
+# observable anchor shock predict the PIT-valid linked filers DOWN; applies the
+# max-concurrent cap) and `frontier_mech` (control twin: every observable linked
+# name, no cap — graph-vs-coin). Buckets frontier:customer_concentration /
+# frontier:sole_supplier advance or die independently. Mechanical, no LLM.
+frontier:
+  enabled: true   # 9d: forward sector-neutral sign-accuracy sample (mechanical,
+                  # prediction-only on the down side -> zero capital risk). 9e
+                  # adds an up-side BUY lane alongside (long-tradeable).
+  bot_id: frontier
+  mech_bot_id: frontier_mech
+  graph_db: data/state.db  # frontier_edges lives here (not paper.db)
+  universe_metadata: stockbot/data/universe_expanded.metadata.json
+
+# Simulated broker settings
+simulated_broker:
+  initial_cash: 100000.0
+  slippage_pct: 0.003  # 0.3% round-trip on sub-$1B names
+  execution_timing: next_bar  # same_bar | next_bar
+  # 1.5e: cost profile allows spread/impact scaling by liquidity.
+  # robinhood_retail is an approximation for U.S. retail market orders
+  # (not a venue-guaranteed rule 605 simulator).
+  cost_profile: robinhood_retail  # flat | small_cap | robinhood_retail
+  spread_bps: 8.0
+  impact_coeff_bps: 6.0
+  adv_shares: 5000000.0
+  symbol_costs:
+    FAKE:
+      spread_bps: 12.0
+      adv_shares: 750000.0
+
+# Risk engine limits (deterministic — no LLM)
+risk:
+  max_position_pct: 0.05       # 5% of portfolio per position
+  max_daily_loss_pct: 0.03     # -3% day → halt new entries
+  max_drawdown_pct: 0.08       # -8% trailing → full halt
+  max_orders_per_day: 20
+
+# LLM router (runtime models — unused in Phase 0)
+llm:
+  cheap_tier: claude-haiku-4-5
+  strong_tier: claude-opus-4-8
+  cross_check: gpt-5.5
+
+# SQLite state store
+state:
+  db_path: data/stockbot.db
+
+# Historical replay CSV sources (Phase 1a)
+historical_data:
+  prices_path: fixtures/historical/prices.csv
+  events_path: fixtures/historical/events.csv
+
+# Hello-world bot (Phase 0 smoke test)
+hello_world:
+  symbol: FAKE
+  quantity: 10
+  side: buy
+
+# Flow Lens — synthetic retail-crowd logger (Workstream F1; no capital)
+flow_lens:
+  enabled: true
+  consensus_threshold: 0.5
+  # Empty consumer_models → defaults (chatgpt, claude, grok, gemini)
+  consumer_models: []

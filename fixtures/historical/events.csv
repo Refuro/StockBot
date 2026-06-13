@@ -1,0 +1,4 @@
+event_id,event_type,symbol,timestamp,payload_json
+evt-1,earnings,FAKE,2024-01-02T10:30:00+00:00,"{""surprise_pct"": 6.2, ""quarter"": ""Q4"", ""earnings_date"": ""2024-01-02""}"
+evt-2,filing_8k,FAKE,2024-01-03T09:30:00+00:00,"{""item"": ""2.02"", ""headline"": ""Preliminary results"", ""filing_timestamp"": ""2024-01-03T09:30:00+00:00""}"
+evt-3,transcript,FAKE,2024-01-03T09:35:00+00:00,"{""source"": ""earnings_call"", ""transcript_id"": ""fake-q4-2024"", ""published_at"": ""2024-01-03T09:35:00+00:00""}"

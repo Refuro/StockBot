@@ -1,0 +1,74 @@
+# --- Secrets & credentials ---
+.env
+.env.local
+secrets/
+
+# --- Runtime safety rails ---
+KILL_SWITCH
+
+# --- Local state (SQLite, sidecars, ingested CSVs) ---
+/data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# --- Generated outputs ---
+logs/
+reports/
+
+# --- Downloaded API caches (regenerate via ingest / build scripts) ---
+fixtures/real_cache/
+fixtures/frontier_cache/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+*.egg
+*.egg-info/
+.installed.cfg
+pip-wheel-metadata/
+share/python-wheels/
+
+# --- Virtual environments ---
+.venv/
+venv/
+ENV/
+env/
+
+# --- Test / lint / type-check ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+
+# --- IDE / editor ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Local AI assistant state ---
+.claude/
